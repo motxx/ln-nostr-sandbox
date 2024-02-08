@@ -1,4 +1,4 @@
-# NWA sample app
+# NWC sample app
 
 ```
 bun install

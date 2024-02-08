@@ -4,7 +4,7 @@
 // from nostr-tools (Public domains)
 export type NostrEvent = {
   id?: string;
-  kind: number; // https://github.com/nostr-protocol/nips#event-kinds
+  kind: number;
   tags: string[][];
   pubkey: string;
   content: string;
