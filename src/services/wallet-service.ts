@@ -1,18 +1,26 @@
 import { NostrWalletConnect } from "../infrastructure/network/nostr/nostr-wallet-connect";
-import { WalletNotConnectedError } from "./error";
+import { WalletNotInitializedError } from "./error";
 
 export class WalletService {
-  #walletConnect?: NostrWalletConnect;
+  #nwc?: NostrWalletConnect;
 
   async connect(connectionUri: string) {
     const nwc = await NostrWalletConnect.connect(connectionUri);
-    this.#walletConnect = nwc;
+    this.#nwc = nwc;
   }
 
   async sendPayment(bolt11Invoice: string) {
-    if (!this.#walletConnect) {
-      throw new WalletNotConnectedError();
+    if (!this.#nwc) {
+      throw new WalletNotInitializedError();
     }
-    return this.#walletConnect.sendPayment(bolt11Invoice);
+    return this.#nwc.sendPayment(bolt11Invoice);
+  }
+
+  async zap(amount: number) {
+    if (!this.#nwc) {
+      throw new WalletNotInitializedError();
+    }
+    this.#nwc;
+    return this.#nwc.sendPayment("");
   }
 }

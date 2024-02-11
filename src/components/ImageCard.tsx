@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ContentService } from '../services/content-service';
 import { UserService } from '../services/user-service';
 import { WalletService } from '../services/wallet-service';
@@ -22,14 +22,33 @@ const ImageCard: React.FC<ImageCardProps> = (props) => {
   const handleZap = async () => {
     const user = await props.userService.fetch();
     const zapAmount = user.settings.zapAmount;
-    const sendZapResponse = await new SendZap(props.walletService).execute("", zapAmount);
+    const zapTargetAddress = "moti@getalby.com";
+    const sendZapResponse = await new SendZap(props.walletService, props.userService).execute(zapTargetAddress, zapAmount);
     const userNpub = user.npub; // temporarily send zap to me
     const contents = (await new FetchUserContents(props.contentService).execute(userNpub));
-    const target = contents.find(content => content.id === props.contentId)!.cloneWithZap(zapAmount);
-    const newContents = contents.map(content => content.id === props.contentId ? target : content);
+    const content = contents.find(content => content.id === props.contentId);
+    if (!content) {
+      throw new Error("Content not found");
+    }
+    const newContent = Content.copyWithZap(content, zapAmount);
+    const newContents = contents.map(content => content.id === props.contentId ? newContent : content);
     await new UpdateContents(props.contentService).execute(userNpub, newContents);
-    setZaps(target.totalZappedAmount);
+    setZaps(newContent.totalZappedAmount);
   };
+
+  useEffect(() => {
+    // TODO: コンテンツを配列で引く仕組みが酷いので改善する
+    (async () => {
+      const user = await props.userService.fetch();
+      const userNpub = user.npub;
+      const contents = (await new FetchUserContents(props.contentService).execute(userNpub));
+      const content = contents.find(content => content.id === props.contentId);
+      if (!content) {
+        throw new Error("Content not found");
+      }
+      setZaps(content.totalZappedAmount);
+    })();
+  }, [props]);
 
   return (
     <div className="overflow-hidden rounded-lg shadow-lg bg-white transition duration-300 transform hover:scale-105">

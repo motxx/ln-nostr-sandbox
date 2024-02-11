@@ -22,9 +22,3 @@ export class ContentStore {
     return `contents:${userNpub}`;
   }
 }
-
-/*
- * lud16 LNURLから情報を取ってzapする
- * zapした金額はコンテンツに紐づけておく
- * 支払情報、コンテンツはサービスが管理する
- */

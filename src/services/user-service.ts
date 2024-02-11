@@ -56,4 +56,9 @@ export class UserService implements UserRepository, UserSettingsRepository {
     }
     return settings;
   }
+
+  async zap(nip05Id: string, amount: number): Promise<void> {
+    const paymentRequest = await this.#nostrClient.zap(nip05Id, amount);
+    console.log("Payment request", paymentRequest);
+  }
 }

@@ -9,3 +9,9 @@ export class NostrNWCNotInitializedError extends Error {
     super("nwc is not initialized.");
   }
 }
+
+export class NostrUnknownUserError extends Error {
+  constructor(userAddress: string) {
+    super(`Unknown user. userAddress:${userAddress}`);
+  }
+}

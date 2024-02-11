@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@getalby/sdk": "^3.2.3",
+    "@nostr-dev-kit/ndk": "../../nostr-dev-kit/ndk/ndk",
     "axios": "^1.6.7",
     "bech32": "^2.0.0",
     "nostr-key-value": "^0.3.4",
