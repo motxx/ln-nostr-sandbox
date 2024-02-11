@@ -20,14 +20,29 @@
   "devDependencies": {
     "@types/react": "^18.2.51",
     "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
+    "@webbtc/webln-types": "^3.0.0",
+    "autoprefixer": "^10.4.17",
+    "eslint-config-prettier": "^9.1.0",
+    "postcss": "^8.4.34",
+    "prettier": "^3.2.5",
+    "react-router-dom": "^6.22.0",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
     "vitest": "^1.2.2"
   },
   "dependencies": {
+    "@getalby/sdk": "^3.2.3",
+    "@nostr-dev-kit/ndk": "../../nostr-dev-kit/ndk/ndk",
+    "axios": "^1.6.7",
+    "bech32": "^2.0.0",
+    "nostr-key-value": "^0.3.4",
+    "nostr-tools": "^2.1.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sha256-uint8array": "^0.10.7"
   },
   "scripts": {
     "dev": "vite",
