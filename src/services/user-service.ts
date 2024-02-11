@@ -12,6 +12,15 @@ import {
   UserFailedToUpdateSettingsError,
 } from "./error";
 
+export interface GetZapInvoiceResponse {
+  pr: string;
+  verify: string;
+  successAction?: {
+    tag: string;
+    message?: string;
+  };
+}
+
 export class UserService implements UserRepository, UserSettingsRepository {
   #nostrClient: NostrClient;
   #userStore: UserStore;
@@ -55,5 +64,12 @@ export class UserService implements UserRepository, UserSettingsRepository {
       throw new UserFailedToUpdateSettingsError(error);
     }
     return settings;
+  }
+
+  async getZapInvoice(
+    nip05Id: string,
+    sats: number
+  ): Promise<GetZapInvoiceResponse> {
+    return this.#nostrClient.signAndGetZapInvoice(nip05Id, sats);
   }
 }

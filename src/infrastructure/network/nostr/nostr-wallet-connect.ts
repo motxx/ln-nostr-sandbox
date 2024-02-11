@@ -1,4 +1,5 @@
 import { webln } from "@getalby/sdk";
+import { SendPaymentResponse } from "../../../services/wallet-service";
 
 export class NostrWalletConnect {
   private constructor(private nwc: webln.NostrWebLNProvider) {}
@@ -15,8 +16,8 @@ export class NostrWalletConnect {
     this.nwc.close();
   }
 
-  async sendPayment(bolt11Invoice: string) {
+  async sendPayment(bolt11Invoice: string): Promise<SendPaymentResponse> {
     const response = await this.nwc.sendPayment(bolt11Invoice);
-    return response.preimage;
+    return { preimage: response.preimage };
   }
 }

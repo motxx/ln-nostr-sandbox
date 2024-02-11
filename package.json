@@ -35,12 +35,14 @@
   },
   "dependencies": {
     "@getalby/sdk": "^3.2.3",
+    "@nostr-dev-kit/ndk": "../../nostr-dev-kit/ndk/ndk",
     "axios": "^1.6.7",
     "bech32": "^2.0.0",
     "nostr-key-value": "^0.3.4",
     "nostr-tools": "^2.1.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "sha256-uint8array": "^0.10.7"
   },
   "scripts": {
     "dev": "vite",

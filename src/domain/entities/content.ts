@@ -7,13 +7,13 @@ export class Content {
     public readonly totalZappedAmount: number
   ) {}
 
-  cloneWithZap(addedZap: number): Content {
+  static copyWithZap(content: Content, addedZap: number): Content {
     return new Content(
-      this.id,
-      this.title,
-      this.description,
-      this.imageUrl,
-      this.totalZappedAmount + addedZap
+      content.id,
+      content.title,
+      content.description,
+      content.imageUrl,
+      content.totalZappedAmount + addedZap
     );
   }
 }

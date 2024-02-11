@@ -37,8 +37,8 @@ export class ContentFailedToUpdateError extends ErrorWithDetails {
   }
 }
 
-export class WalletNotConnectedError extends Error {
+export class WalletNotInitializedError extends Error {
   constructor() {
-    super("Wallet not connected");
+    super("Wallet not initialized");
   }
 }

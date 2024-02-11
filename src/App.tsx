@@ -19,8 +19,10 @@ function App() {
   const [contents, setContents] = useState<Content[]>([]);
   useEffect(() => {
     if (user && contentService) {
-      console.log('fetching user contents');
       new FetchUserContents(contentService).execute(user.npub).then((cs) => setContents(cs));
+    }
+    if (user && walletService) {
+      walletService.connect(user.settings.connectionUri);
     }
   }, [user]);
 
