@@ -30,19 +30,21 @@ export class UserService implements UserRepository, UserSettingsRepository {
       throw new UserFailedToLoginError(error);
     });
     const npub = await this.#nostrClient.getNpub();
+    const pubkey = await this.#nostrClient.getPublicKey();
     this.#userStore = new UserStore(npub);
     const settings = await this.fetchUserSettings(npub);
-    return new User(npub, "nostr", settings);
+    return new User(npub, pubkey, "nostr", settings);
   }
 
   async fetch(): Promise<User> {
     const npub = await this.#nostrClient.getNpub();
+    const pubkey = await this.#nostrClient.getPublicKey();
     const settings = await this.fetchUserSettings(npub);
-    return new User(npub, "nostr", settings);
+    return new User(npub, pubkey, "nostr", settings);
   }
 
   async fetchUserSettings(npub: string): Promise<UserSettings> {
-    let settings = new UserSettings("", 1);
+    let settings = new UserSettings("", "", 1);
     try {
       const s = this.#userStore.get(npub);
       if (s !== null) {

@@ -30,28 +30,29 @@ export class NostrClient {
     this.#relays = relays;
   }
 
+  static readonly RELAYS = [
+    // "wss://localhost:7000",
+    "wss://pablof7z.nostr1.com",
+    "wss://offchain.pub",
+    "wss://relay.f7z.io",
+    "wss://relay.damus.io",
+    "wss://relay.snort.social",
+    "wss://offchain.pub/",
+    "wss://nostr.mom",
+    "wss://nostr-pub.wellorder.net",
+    "wss://purplepag.es",
+    "wss://brb.io/",
+  ];
+
   static async connect(): Promise<NostrClient> {
     const signer = new NDKNip07Signer();
     const user = await signer.blockUntilReady();
-    const relays = [
-      // "wss://localhost:7000",
-      "wss://pablof7z.nostr1.com",
-      "wss://offchain.pub",
-      "wss://relay.f7z.io",
-      "wss://relay.damus.io",
-      "wss://relay.snort.social",
-      "wss://offchain.pub/",
-      "wss://nostr.mom",
-      "wss://nostr-pub.wellorder.net",
-      "wss://purplepag.es",
-      "wss://brb.io/",
-    ];
     const ndk = new NDK({
-      explicitRelayUrls: relays,
+      explicitRelayUrls: NostrClient.RELAYS,
       signer,
     });
     ndk.assertSigner();
-    return new NostrClient(ndk, user, relays);
+    return new NostrClient(ndk, user, NostrClient.RELAYS);
   }
 
   async getPublicKey() {
