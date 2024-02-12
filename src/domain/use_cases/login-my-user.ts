@@ -6,6 +6,6 @@ export class LoginMyUser {
   async execute(): Promise<User> {
     const user = await this.userRepository.login();
     const settings = await this.userRepository.fetchUserSettings(user.npub);
-    return new User(user.npub, user.username, settings);
+    return new User(user.npub, user.pubkey, user.username, settings);
   }
 }

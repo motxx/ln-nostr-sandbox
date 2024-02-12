@@ -1,6 +1,7 @@
 export class User {
   constructor(
     public readonly npub: string,
+    public readonly pubkey: string,
     public readonly username: string,
     public readonly settings: UserSettings
   ) {}
@@ -9,6 +10,7 @@ export class User {
 export class UserSettings {
   constructor(
     public readonly connectionUri: string,
+    public readonly nwaConnectionURI: string,
     public zapAmount: number
   ) {}
 }

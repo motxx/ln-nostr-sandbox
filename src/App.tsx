@@ -31,7 +31,7 @@ function App() {
       <Header user={user} userService={userService} handleLoggedIn={(u) => setUser(u)}/>
       <Routes>
         <Route path="/" element={<Home contents={contents} contentService={contentService} userService={userService} walletService={walletService}/>} />
-        <Route path="/settings" element={<Settings user={user} userService={userService} handleSettingsApplied={(u) => setUser(u)}/>} />
+        <Route path="/settings" element={<Settings user={user} userService={userService} walletService={walletService} handleSettingsApplied={(u) => setUser(u)}/>} />
       </Routes>
     </BrowserRouter>
   );
