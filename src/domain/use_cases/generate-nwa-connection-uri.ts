@@ -4,7 +4,8 @@ export class GenerateNWAConnectionURI {
   constructor(private readonly walletService: WalletService) {}
 
   async execute(zapAmount: number): Promise<string> {
-    const url = await this.walletService.connectNwa(zapAmount);
+    await this.walletService.connectNwa();
+    const url = await this.walletService.generateNwaConnectionUri();
     console.log({ url });
     return url;
   }
