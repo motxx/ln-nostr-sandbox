@@ -4,8 +4,8 @@ import {
   UserSettings,
   UserSettingsRepository,
 } from "../domain/entities/user";
-import { NostrClient } from "../infrastructure/network/nostr/nostr-client";
 import { UserStore } from "../infrastructure/storage/user-store";
+import { NostrClient } from "./nostr/nostr-client";
 import {
   UserFailedToGetSettingsError,
   UserFailedToLoginError,

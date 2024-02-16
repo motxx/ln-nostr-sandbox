@@ -1,5 +1,5 @@
 import { webln } from "@getalby/sdk";
-import { SendPaymentResponse } from "../../../services/wallet-service";
+import { SendPaymentResponse } from "../wallet-service";
 
 export class NostrWalletConnect {
   private constructor(private nwc: webln.NostrWebLNProvider) {}

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { User } from '../domain/entities/user';
+import { GenerateNWAConnectionURI } from '../domain/use_cases/generate-nwa-connection-uri';
 import { UpdateMyUserSettings } from '../domain/use_cases/update-my-user-settings';
 import { UserService } from '../services/user-service';
-import { GenerateNWAConnectionURI } from '../domain/use_cases/generate-nwa-connection-uri';
 import { WalletService } from '../services/wallet-service';
 
 interface SettingsProps {

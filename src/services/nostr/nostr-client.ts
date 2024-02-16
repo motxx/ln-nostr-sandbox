@@ -1,5 +1,4 @@
-import { Event, UnsignedEvent, nip57 } from "nostr-tools";
-//import { kinds } from "nostr-tools";
+import { Event, UnsignedEvent, kinds } from "nostr-tools";
 import NDK, { NDKUser, NDKNip07Signer } from "@nostr-dev-kit/ndk";
 import {
   generateEventId,
@@ -17,7 +16,7 @@ import {
   NostrUnknownUserError,
 } from "./error";
 import axios from "axios";
-import { GetZapInvoiceResponse } from "../../../services/user-service";
+import { GetZapInvoiceResponse } from "../user-service";
 
 export class NostrClient {
   #ndk: NDK;
@@ -31,17 +30,17 @@ export class NostrClient {
   }
 
   static readonly RELAYS = [
-    // "wss://localhost:7000",
-    "wss://pablof7z.nostr1.com",
-    "wss://offchain.pub",
-    "wss://relay.f7z.io",
-    "wss://relay.damus.io",
-    "wss://relay.snort.social",
-    "wss://offchain.pub/",
-    "wss://nostr.mom",
-    "wss://nostr-pub.wellorder.net",
-    "wss://purplepag.es",
-    "wss://brb.io/",
+    "wss://relay.nostr.wirednet.jp",
+    "wss://relay-jp.nostr.wirednet.jp",
+    "wss://ipv6.nostr.wirednet.jp",
+    "wss://nostr.holybea.com",
+    "wss://nostr.fediverse.jp",
+    "wss://yabu.me",
+    "wss://nostr-relay.nokotaro.com",
+    "wss://nrelay.c-stellar.net",
+    "wss://nrelay-jp.c-stellar.ne",
+    "wss://relay.yozora.world",
+    "wss://r.kojira.io",
   ];
 
   static async connect(): Promise<NostrClient> {
@@ -174,7 +173,7 @@ export class NostrClient {
     }
 
     const unsignedEvent: UnsignedEvent = {
-      kind: 9734, //kinds.ZapRequest,
+      kind: kinds.ZapRequest,
       pubkey: this.#user.pubkey,
       created_at: unixtime(),
       tags: [

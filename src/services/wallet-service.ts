@@ -1,6 +1,5 @@
-import { User } from "../domain/entities/user";
-import { NostrClient } from "../infrastructure/network/nostr/nostr-client";
-import { NostrWalletConnect } from "../infrastructure/network/nostr/nostr-wallet-connect";
+import { NostrClient } from "./nostr/nostr-client";
+import { NostrWalletConnect } from "./nostr/nostr-wallet-connect";
 import { UserFailedToLoginError, WalletNotInitializedError } from "./error";
 
 export interface SendPaymentResponse {
