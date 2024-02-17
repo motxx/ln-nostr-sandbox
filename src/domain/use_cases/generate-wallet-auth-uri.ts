@@ -1,12 +1,12 @@
 import { WalletService } from "../../services/wallet-service";
 
-export class GenerateNWAConnectionURI {
+export class GenerateWalletAuthUri {
   constructor(private readonly walletService: WalletService) {}
 
   async execute(zapAmount: number): Promise<string> {
     await this.walletService.connectNwa();
-    const url = await this.walletService.generateNwaConnectionUri();
-    console.log({ url });
-    return url;
+    const uri = await this.walletService.generateAuthUri();
+    console.log({ uri });
+    return uri;
   }
 }

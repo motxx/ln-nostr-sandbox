@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { User } from '../domain/entities/user';
-import { GenerateNWAConnectionURI } from '../domain/use_cases/generate-nwa-connection-uri';
+import { GenerateWalletAuthUri } from '../domain/use_cases/generate-wallet-auth-uri';
 import { UpdateMyUserSettings } from '../domain/use_cases/update-my-user-settings';
 import { UserService } from '../services/user-service';
 import { WalletService } from '../services/wallet-service';
@@ -16,7 +16,7 @@ interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = (props) => {
   const [connectionUri, setConnectionUri] = useState(props.user?.settings.connectionUri || '');
-  const [nwaConnectionUri, setNWAConnectionUri] = useState(props.user?.settings.nwaConnectionURI || '');
+  const [walletAuthUri, setWalletAuthUri] = useState(props.user?.settings.walletAuthUri || '');
   const [zapAmount, setZapAmount] = useState(props.user?.settings.zapAmount || 1);
   const navigate = useNavigate();
 
@@ -34,8 +34,8 @@ const Settings: React.FC<SettingsProps> = (props) => {
 
   const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const uri = await new GenerateNWAConnectionURI(props.walletService).execute(zapAmount);
-    setNWAConnectionUri(uri);
+    const uri = await new GenerateWalletAuthUri(props.walletService).execute(zapAmount);
+    setWalletAuthUri(uri);
   };
 
   return (
@@ -52,7 +52,7 @@ const Settings: React.FC<SettingsProps> = (props) => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="uri"
                 type="text"
-                placeholder="Enter URI"
+                placeholder="nostr+walletconnect://"
                 value={connectionUri}
                 onChange={(e) => setConnectionUri(e.target.value)}
               />
@@ -81,7 +81,7 @@ const Settings: React.FC<SettingsProps> = (props) => {
           <form onSubmit={handleGenerate} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="uri">
-                Nostr Wallet Auth - (doesn't work for now)
+                Nostr Wallet Auth
               </label>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="uri">
@@ -103,8 +103,8 @@ const Settings: React.FC<SettingsProps> = (props) => {
                   Generate
                 </button>
               </div>
-              {nwaConnectionUri && (
-                <QRCodeSVG value={nwaConnectionUri} size={300}/>
+              {walletAuthUri && (
+                <QRCodeSVG value={walletAuthUri} size={300}/>
               )}
             </div>
           </form>

@@ -1,5 +1,11 @@
-import { Event, UnsignedEvent, kinds } from "nostr-tools";
-import NDK, { NDKUser, NDKNip07Signer } from "@nostr-dev-kit/ndk";
+import { Event, UnsignedEvent } from "nostr-tools";
+import NDK, {
+  NDKUser,
+  NDKNip07Signer,
+  NDKKind,
+  NDKRelaySet,
+  NDKRelay,
+} from "@nostr-dev-kit/ndk";
 import {
   generateEventId,
   toLnurlPayStaticEndpoint,
@@ -16,42 +22,66 @@ import {
   NostrUnknownUserError,
 } from "./error";
 import axios from "axios";
-import { GetZapInvoiceResponse } from "../user-service";
+import { SendZapRequestResponse } from "../user-service";
+import { CommonRelays } from "./common-relays";
 
 export class NostrClient {
   #ndk: NDK;
   #user: NDKUser;
-  #relays: string[];
 
-  private constructor(ndk: NDK, user: NDKUser, relays: string[]) {
+  private constructor(ndk: NDK, user: NDKUser) {
     this.#ndk = ndk;
     this.#user = user;
-    this.#relays = relays;
   }
 
-  static readonly RELAYS = [
-    "wss://relay.nostr.wirednet.jp",
-    "wss://relay-jp.nostr.wirednet.jp",
-    "wss://ipv6.nostr.wirednet.jp",
-    "wss://nostr.holybea.com",
-    "wss://nostr.fediverse.jp",
-    "wss://yabu.me",
-    "wss://nostr-relay.nokotaro.com",
-    "wss://nrelay.c-stellar.net",
-    "wss://nrelay-jp.c-stellar.ne",
-    "wss://relay.yozora.world",
-    "wss://r.kojira.io",
-  ];
+  static readonly LoginTimeoutMSec = 60000;
+  static readonly Relays = CommonRelays.Iris;
 
   static async connect(): Promise<NostrClient> {
-    const signer = new NDKNip07Signer();
+    const signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec);
     const user = await signer.blockUntilReady();
     const ndk = new NDK({
-      explicitRelayUrls: NostrClient.RELAYS,
+      explicitRelayUrls: NostrClient.Relays,
       signer,
     });
     ndk.assertSigner();
-    return new NostrClient(ndk, user, NostrClient.RELAYS);
+
+    await ndk.connect().catch((e) => {
+      console.log("Failed to connect to relay", e);
+    });
+
+    //const bitcoinMagazine = "npub1jfn4ghffz7uq7urllk6y4rle0yvz26800w4qfmn4dv0sr48rdz9qyzt047";
+    const relaySet = new NDKRelaySet(new Set(), ndk);
+    for (const relay of NostrClient.Relays) {
+      relaySet.addRelay(new NDKRelay(relay));
+    }
+
+    const subscription = ndk.subscribe(
+      {
+        kinds: [
+          0,
+          1,
+          4,
+          NDKKind.Zap,
+          NDKKind.ZapRequest,
+          NDKKind.NWCInfoEvent,
+          NDKKind.NWCRequest,
+          NDKKind.NWCResponse,
+        ],
+        authors: [user.pubkey],
+      },
+      { closeOnEose: true },
+      relaySet,
+      true
+    );
+    subscription.on("request", (event) => {
+      console.log(`request: ${event.id}`);
+    });
+    subscription.on("event", (event) => {
+      console.log("event", event);
+    });
+    subscription.on("eose", () => console.log(`eose`));
+    return new NostrClient(ndk, user);
   }
 
   async getPublicKey() {
@@ -62,33 +92,28 @@ export class NostrClient {
     return this.#user.npub;
   }
 
-  // NIP-57 Lightning Zaps: https://scrapbox.io/nostr/NIP-57
-  async signAndGetZapInvoice(
+  /**
+   * Query zap invoice from NIP-05 identifier
+   * NIP-57 Lightning Zaps: https://scrapbox.io/nostr/NIP-57
+   * @param nip05Id
+   * @param sat
+   * @returns SendZapRequestResponse
+   */
+  async sendZapRequest(
     nip05Id: string,
     sat: number
-  ): Promise<GetZapInvoiceResponse> {
+  ): Promise<SendZapRequestResponse> {
     const millisats = sat * 1000;
     const unsignedEvent = await this.#makeZapRequest(nip05Id, millisats);
     const sig = await this.#ndk.signer!.sign(unsignedEvent);
+
     const zapEndpoint = await this.#getZapEndpointWithParams(
       unsignedEvent,
       sig,
       nip05Id
     );
 
-    /*
-    Example response from zap endpoint
-    {
-        "status": "OK",
-        "successAction": {
-            "tag": "message",
-            "message": "Thanks, sats received!"
-        },
-        "verify": "https://getalby.com/lnurlp/moti/verify/mJstG5LqRvPjPJVCeBmjvfNQ",
-        "routes": [],
-        "pr": "lnbc10n1pju3356pp59dzs5xedvq3yv96n90hlrlf26g8uagsrhsw9h6ccymhhuu90chrshp5cezvxddw0lgesz3xpr67q7v8tux7uv5h5vdwukrlgg3m22ce6dcscqzzsxqyz5vqsp5ju3nx8d7ahzn7mzl5nplxq7w7x6pggr7p9s6nytzg2rcexf9vu6q9qyyssqje96szu2umwqjuzcxccwradqga9fuu3g9gnm8ssrfmz2ql9wxhen32fxqzpnu8nshqemz4dlwss2gkyfl5y76zc8d2u9q7rzy6uwr9spfjxhc5"
-    }
-    */
+    // Do not publish. Send the request to zap endpoint.
     const response = await axios.get(zapEndpoint);
     if (!response.data || response.data.status !== "OK") {
       throw new NostrCallZapEndpointError(response);
@@ -173,11 +198,11 @@ export class NostrClient {
     }
 
     const unsignedEvent: UnsignedEvent = {
-      kind: kinds.ZapRequest,
+      kind: NDKKind.ZapRequest,
       pubkey: this.#user.pubkey,
       created_at: unixtime(),
       tags: [
-        ["relays", ...this.#relays],
+        ["relays", ...NostrClient.Relays],
         ["amount", msat.toString()],
         ["lnurl", toLnurlPayUrl(toLnurlPayStaticEndpoint(nip05Id)!)],
         ["p", to.pubkey],

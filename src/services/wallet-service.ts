@@ -1,6 +1,5 @@
-import { NostrClient } from "./nostr/nostr-client";
 import { NostrWalletConnect } from "./nostr/nostr-wallet-connect";
-import { UserFailedToLoginError, WalletNotInitializedError } from "./error";
+import { WalletNotInitializedError } from "./error";
 import { NostrWalletAuth } from "./nostr/nostr-wallet-auth";
 
 export interface SendPaymentResponse {
@@ -8,16 +7,8 @@ export interface SendPaymentResponse {
 }
 
 export class WalletService {
-  #nwc?: NostrWalletConnect;
   #nwa?: NostrWalletAuth;
-
-  async connect(connectionUri: string) {
-    if (this.#nwc) {
-      return;
-    }
-    const nwc = await NostrWalletConnect.connect(connectionUri);
-    this.#nwc = nwc;
-  }
+  #nwc?: NostrWalletConnect;
 
   async connectNwa() {
     if (this.#nwa) {
@@ -27,19 +18,25 @@ export class WalletService {
     this.#nwa = nwa;
   }
 
-  async generateNwaConnectionUri() {
+  async generateAuthUri() {
     if (this.#nwa) {
-      return this.#nwa.generateConnectionUri();
+      return this.#nwa.generateAuthUri();
     }
     throw new WalletNotInitializedError();
   }
 
-  async sendPayment(bolt11Invoice: string): Promise<SendPaymentResponse> {
+  async connectNwc(connectionUri: string) {
     if (this.#nwc) {
-      return this.#nwc.sendPayment(bolt11Invoice);
-    } else if (this.#nwa) {
-      return this.#nwa.sendPayment(bolt11Invoice);
+      return;
     }
-    throw new WalletNotInitializedError();
+    const nwc = await NostrWalletConnect.connect(connectionUri);
+    this.#nwc = nwc;
+  }
+
+  async sendPayment(invoice: string): Promise<SendPaymentResponse> {
+    if (!this.#nwc) {
+      throw new WalletNotInitializedError();
+    }
+    return this.#nwc.sendPayment(invoice);
   }
 }

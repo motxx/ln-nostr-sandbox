@@ -16,8 +16,8 @@ export class NostrWalletConnect {
     this.nwc.close();
   }
 
-  async sendPayment(bolt11Invoice: string): Promise<SendPaymentResponse> {
-    const response = await this.nwc.sendPayment(bolt11Invoice);
+  async sendPayment(invoice: string): Promise<SendPaymentResponse> {
+    const response = await this.nwc.sendPayment(invoice);
     return { preimage: response.preimage };
   }
 }
