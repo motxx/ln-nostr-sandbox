@@ -15,15 +15,24 @@ import {
 import {
   NostrCallZapEndpointError,
   NostrGetZapEndpointCallbackUrlError,
-  NostrGetZapInfoError,
   NostrInvoiceNotFoundError,
   NostrMaxSendableConstraintError,
   NostrMinSendableConstraintError,
+  NostrRequestLnurlPayError,
   NostrUnknownUserError,
 } from "./error";
 import axios from "axios";
 import { SendZapRequestResponse } from "../user-service";
 import { CommonRelays } from "./common-relays";
+
+export type LnurlPay = {
+  allowsNostr?: boolean;
+  nostrPubkey?: string;
+  callback?: string;
+  minSendable?: number;
+  maxSendable?: number;
+  [key: string]: any;
+};
 
 export class NostrClient {
   #ndk: NDK;
@@ -131,15 +140,11 @@ export class NostrClient {
     };
   }
 
-  async #getZapInfo(metadata: Event) {
+  async #requestLnurlPay(metadata: Event): Promise<LnurlPay> {
     const { lud16 } = JSON.parse(metadata.content);
-    if (!lud16) {
-      throw new Error("lud16 not found in content");
-    }
-    const [name, domain] = lud16.split("@");
-    const lnurl = new URL(`/.well-known/lnurlp/${name}`, `https://${domain}`);
-    const res = await axios.get(lnurl.toString());
-    const body = await res.data;
+    const lnurl = toLnurlPayStaticEndpoint(lud16);
+    const res = await axios.get(lnurl);
+    const body: LnurlPay = await res.data;
     if (!body.allowsNostr || !body.nostrPubkey) {
       throw new Error(`${lud16} doesn't support Nostr. body: ${body}`);
     }
@@ -158,24 +163,24 @@ export class NostrClient {
       sig,
       content: JSON.stringify({ lud16 }),
     };
-    const zapInfo = await this.#getZapInfo(metadata).catch((e) => {
-      throw new NostrGetZapInfoError(metadata, e);
+    const lnurlPay = await this.#requestLnurlPay(metadata).catch((e) => {
+      throw new NostrRequestLnurlPayError(metadata, e);
     });
-    const callbackUrl = zapInfo.callback;
+    const callbackUrl = lnurlPay.callback;
     if (!callbackUrl) {
-      throw new NostrGetZapEndpointCallbackUrlError(metadata, zapInfo);
+      throw new NostrGetZapEndpointCallbackUrlError(metadata, lnurlPay);
     }
     const nostr = encodeURI(JSON.stringify(unsignedEvent));
-    const amount = unsignedEvent.tags[1][1];
-    if (zapInfo.minSendable && amount < zapInfo.minSendable) {
-      throw new NostrMinSendableConstraintError(+amount, zapInfo.minSendable);
+    const amount = +unsignedEvent.tags[1][1];
+    if (lnurlPay.minSendable && amount < lnurlPay.minSendable) {
+      throw new NostrMinSendableConstraintError(amount, lnurlPay.minSendable);
     }
-    if (zapInfo.maxSendable && amount > zapInfo.maxSendable) {
-      throw new NostrMaxSendableConstraintError(+amount, zapInfo.maxSendable);
+    if (lnurlPay.maxSendable && amount > lnurlPay.maxSendable) {
+      throw new NostrMaxSendableConstraintError(amount, lnurlPay.maxSendable);
     }
     const lnurl = unsignedEvent.tags[2][1];
     const zapEndpoint = new URL(callbackUrl);
-    zapEndpoint.searchParams.append("amount", amount);
+    zapEndpoint.searchParams.append("amount", amount.toString());
     zapEndpoint.searchParams.append("nostr", nostr);
     zapEndpoint.searchParams.append("lnurl", lnurl);
     return zapEndpoint.toString();
