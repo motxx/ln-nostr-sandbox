@@ -46,6 +46,10 @@ export class NostrClient {
   static readonly LoginTimeoutMSec = 60000;
   static readonly Relays = CommonRelays.Iris;
 
+  /**
+   * Connect NostrClient by NIP-07 (window.nostr)
+   * @returns Promise<NostrClient>
+   */
   static async connect(): Promise<NostrClient> {
     const signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec);
     const user = await signer.blockUntilReady();
@@ -93,10 +97,18 @@ export class NostrClient {
     return new NostrClient(ndk, user);
   }
 
+  /**
+   * Get user's hex pubkey
+   * @returns pubkey
+   */
   async getPublicKey() {
     return this.#user.pubkey;
   }
 
+  /**
+   * Get user's npub
+   * @returns npub
+   */
   async getNpub() {
     return this.#user.npub;
   }
