@@ -1,6 +1,10 @@
 import { webln } from "@getalby/sdk";
 import { SendPaymentResponse } from "../wallet-service";
 
+/**
+ * NIP-47: Nostr Wallet Connect
+ * https://github.com/nostr-protocol/nips/blob/master/47.md
+ */
 export class NostrWalletConnect {
   private constructor(private nwc: webln.NostrWebLNProvider) {}
 
@@ -15,10 +19,6 @@ export class NostrWalletConnect {
     });
     await nwc.enable();
     return new NostrWalletConnect(nwc);
-  }
-
-  disconnect() {
-    this.nwc.close();
   }
 
   /**
