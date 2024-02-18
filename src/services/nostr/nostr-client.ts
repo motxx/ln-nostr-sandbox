@@ -132,22 +132,18 @@ export class NostrClient {
   }
 
   async #getZapInfo(metadata: Event) {
-    let lnurl = "";
-    let { lud16 } = JSON.parse(metadata.content);
-    if (lud16) {
-      let [name, domain] = lud16.split("@");
-      lnurl = new URL(
-        `/.well-known/lnurlp/${name}`,
-        `https://${domain}`
-      ).toString();
-    } else {
-      return null;
+    const { lud16 } = JSON.parse(metadata.content);
+    if (!lud16) {
+      throw new Error("lud16 not found in content");
     }
-    let res = await axios.get(lnurl);
-    let body = await res.data;
-    if (body.allowsNostr && body.nostrPubkey) {
-      return body;
+    const [name, domain] = lud16.split("@");
+    const lnurl = new URL(`/.well-known/lnurlp/${name}`, `https://${domain}`);
+    const res = await axios.get(lnurl.toString());
+    const body = await res.data;
+    if (!body.allowsNostr || !body.nostrPubkey) {
+      throw new Error(`${lud16} doesn't support Nostr. body: ${body}`);
     }
+    return body;
   }
 
   async #getZapEndpointWithParams(
