@@ -161,30 +161,24 @@ export class NostrClient {
     const zapInfo = await this.#getZapInfo(metadata).catch((e) => {
       throw new NostrGetZapInfoError(metadata, e);
     });
-    const zapEndpoint = zapInfo.callback;
-    if (!zapEndpoint) {
+    const callbackUrl = zapInfo.callback;
+    if (!callbackUrl) {
       throw new NostrGetZapEndpointCallbackUrlError(metadata, zapInfo);
     }
     const nostr = encodeURI(JSON.stringify(unsignedEvent));
     const amount = unsignedEvent.tags[1][1];
-    if (zapEndpoint.minSendable && amount < zapEndpoint.minSendable) {
-      throw new NostrMinSendableConstraintError(
-        +amount,
-        zapEndpoint.minSendable
-      );
+    if (zapInfo.minSendable && amount < zapInfo.minSendable) {
+      throw new NostrMinSendableConstraintError(+amount, zapInfo.minSendable);
     }
-    if (zapEndpoint.maxSendable && amount > zapEndpoint.maxSendable) {
-      throw new NostrMaxSendableConstraintError(
-        +amount,
-        zapEndpoint.maxSendable
-      );
+    if (zapInfo.maxSendable && amount > zapInfo.maxSendable) {
+      throw new NostrMaxSendableConstraintError(+amount, zapInfo.maxSendable);
     }
     const lnurl = unsignedEvent.tags[2][1];
-    const url = new URL(zapEndpoint);
-    url.searchParams.append("amount", amount);
-    url.searchParams.append("nostr", nostr);
-    url.searchParams.append("lnurl", lnurl);
-    return url.toString();
+    const zapEndpoint = new URL(callbackUrl);
+    zapEndpoint.searchParams.append("amount", amount);
+    zapEndpoint.searchParams.append("nostr", nostr);
+    zapEndpoint.searchParams.append("lnurl", lnurl);
+    return zapEndpoint.toString();
   }
 
   async #makeZapRequest(nip05Id: string, msat: number): Promise<UnsignedEvent> {
