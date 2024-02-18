@@ -6,12 +6,7 @@ import NDK, {
   NDKRelaySet,
   NDKRelay,
 } from "@nostr-dev-kit/ndk";
-import {
-  generateEventId,
-  toLnurlPayStaticEndpoint,
-  toLnurlPayUrl,
-  unixtime,
-} from "./utils";
+import { generateEventId, unixtime } from "./utils";
 import {
   NostrCallZapEndpointError,
   NostrGetZapEndpointCallbackUrlError,
@@ -24,15 +19,7 @@ import {
 import axios from "axios";
 import { SendZapRequestResponse } from "../user-service";
 import { CommonRelays } from "./common-relays";
-
-export type LnurlPay = {
-  allowsNostr?: boolean;
-  nostrPubkey?: string;
-  callback?: string;
-  minSendable?: number;
-  maxSendable?: number;
-  [key: string]: any;
-};
+import { LnurlPay, toBech32EncodedLnurl, toLnurlPayUrl } from "./lnurl-pay";
 
 export class NostrClient {
   #ndk: NDK;
@@ -154,8 +141,8 @@ export class NostrClient {
 
   async #requestLnurlPay(metadata: Event): Promise<LnurlPay> {
     const { lud16 } = JSON.parse(metadata.content);
-    const lnurl = toLnurlPayStaticEndpoint(lud16);
-    const res = await axios.get(lnurl);
+    const lnurlPayUrl = toLnurlPayUrl(lud16);
+    const res = await axios.get(lnurlPayUrl);
     const body: LnurlPay = await res.data;
     if (!body.allowsNostr || !body.nostrPubkey) {
       throw new Error(`${lud16} doesn't support Nostr. body: ${body}`);
@@ -211,7 +198,7 @@ export class NostrClient {
       tags: [
         ["relays", ...NostrClient.Relays],
         ["amount", msat.toString()],
-        ["lnurl", toLnurlPayUrl(toLnurlPayStaticEndpoint(nip05Id)!)],
+        ["lnurl", toBech32EncodedLnurl(toLnurlPayUrl(nip05Id)!)],
         ["p", to.pubkey],
       ],
       content: "zap request",
