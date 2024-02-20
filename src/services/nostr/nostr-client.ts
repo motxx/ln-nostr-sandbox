@@ -32,12 +32,17 @@ export class NostrClient {
 
   static readonly LoginTimeoutMSec = 60000;
   static readonly Relays = CommonRelays.Iris;
+  static #nostrClient?: NostrClient;
 
   /**
    * Connect NostrClient by NIP-07 (window.nostr)
    * @returns Promise<NostrClient>
    */
   static async connect(): Promise<NostrClient> {
+    if (NostrClient.#nostrClient) {
+      return NostrClient.#nostrClient;
+    }
+
     const signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec);
     const user = await signer.blockUntilReady();
     const ndk = new NDK({
@@ -80,7 +85,9 @@ export class NostrClient {
       console.log("event", event);
     });
     subscription.on("eose", () => console.log(`eose`));
-    return new NostrClient(ndk, user);
+
+    NostrClient.#nostrClient = new NostrClient(ndk, user);
+    return NostrClient.#nostrClient;
   }
 
   /**
