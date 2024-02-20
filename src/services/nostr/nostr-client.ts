@@ -46,9 +46,7 @@ export class NostrClient {
     });
     ndk.assertSigner();
 
-    await ndk.connect().catch((e) => {
-      console.log("Failed to connect to relay", e);
-    });
+    await ndk.connect(1);
 
     //const bitcoinMagazine = "npub1jfn4ghffz7uq7urllk6y4rle0yvz26800w4qfmn4dv0sr48rdz9qyzt047";
     const relaySet = new NDKRelaySet(new Set(), ndk);
