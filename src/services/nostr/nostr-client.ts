@@ -67,6 +67,7 @@ export class NostrClient {
           NDKKind.NWCInfoEvent,
           NDKKind.NWCRequest,
           NDKKind.NWCResponse,
+          NDKKind.NWARequest,
         ],
         authors: [user.pubkey],
       },
