@@ -31,7 +31,10 @@ export class NostrClient {
   }
 
   static readonly LoginTimeoutMSec = 60000;
-  static readonly Relays = CommonRelays.Iris;
+  static readonly Relays = [
+    ...CommonRelays.NostrWalletAuthCompatibles,
+    ...CommonRelays.Iris,
+  ];
   static #nostrClient?: NostrClient;
 
   /**
