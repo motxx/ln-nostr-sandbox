@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,11 +17,19 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
   "devDependencies": {
+    "@types/node": "^20.11.19",
     "@types/react": "^18.2.51",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/parser": "^6.21.0",
@@ -25,6 +37,7 @@
     "@webbtc/webln-types": "^3.0.0",
     "autoprefixer": "^10.4.17",
     "eslint-config-prettier": "^9.1.0",
+    "path": "^0.12.7",
     "postcss": "^8.4.34",
     "prettier": "^3.2.5",
     "react-router-dom": "^6.22.0",
@@ -35,20 +48,18 @@
   },
   "dependencies": {
     "@getalby/sdk": "^3.2.3",
-    "@nostr-dev-kit/ndk": "^2.4.0",
+    "@nostr-dev-kit/ndk": "./custom-ndk/package",
     "axios": "^1.6.7",
     "bech32": "^2.0.0",
     "nostr-key-value": "^0.3.4",
-    "nostr-tools": "^2.1.5",
+    "nostr-tools": "^2.1.7",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sha256-uint8array": "^0.10.7"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "test": "vitest",
-    "test:run": "vitest run"
+    "dev": "bunx vite",
+    "build": "bunx vite build"
   }
 }

@@ -4,15 +4,15 @@ import {
   UserSettings,
   UserSettingsRepository,
 } from "../domain/entities/user";
-import { NostrClient } from "../infrastructure/network/nostr/nostr-client";
 import { UserStore } from "../infrastructure/storage/user-store";
+import { NostrClient } from "./nostr/nostr-client";
 import {
   UserFailedToGetSettingsError,
   UserFailedToLoginError,
   UserFailedToUpdateSettingsError,
 } from "./error";
 
-export interface GetZapInvoiceResponse {
+export interface SendZapRequestResponse {
   pr: string;
   verify: string;
   successAction?: {
@@ -68,10 +68,10 @@ export class UserService implements UserRepository, UserSettingsRepository {
     return settings;
   }
 
-  async getZapInvoice(
+  async sendZapRequest(
     nip05Id: string,
     sats: number
-  ): Promise<GetZapInvoiceResponse> {
-    return this.#nostrClient.signAndGetZapInvoice(nip05Id, sats);
+  ): Promise<SendZapRequestResponse> {
+    return this.#nostrClient.sendZapRequest(nip05Id, sats);
   }
 }

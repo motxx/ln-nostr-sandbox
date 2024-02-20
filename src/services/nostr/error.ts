@@ -1,3 +1,5 @@
+import { LnurlPay } from "./nostr-client";
+
 export class NostrNoWindowNostrError extends Error {
   constructor() {
     super("No window.nostr(NIP-07) found.");
@@ -16,18 +18,18 @@ export class NostrUnknownUserError extends Error {
   }
 }
 
-export class NostrGetZapInfoError extends Error {
+export class NostrRequestLnurlPayError extends Error {
   constructor(metadata: any, details: Error) {
     super(
-      `Failed to get zap info. metadata:${JSON.stringify(metadata)} details:${details}`
+      `Failed to request LNURL-Pay. metadata:${JSON.stringify(metadata)} details:${details}`
     );
   }
 }
 
 export class NostrGetZapEndpointCallbackUrlError extends Error {
-  constructor(metadata: any, zapInfo: any) {
+  constructor(metadata: any, lnurlPay: LnurlPay) {
     super(
-      `Failed to get zap endpoint callback url. metadata:${JSON.stringify(metadata)} zapInfo:${JSON.stringify(zapInfo)}`
+      `Failed to get zap endpoint callback url. metadata:${JSON.stringify(metadata)} lnurlPay:${JSON.stringify(lnurlPay)}`
     );
   }
 }

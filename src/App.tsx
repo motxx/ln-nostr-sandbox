@@ -22,7 +22,7 @@ function App() {
       new FetchUserContents(contentService).execute(user.npub).then((cs) => setContents(cs));
     }
     if (user && walletService) {
-      walletService.connect(user.settings.connectionUri);
+      walletService.connectNwc(user.settings.connectionUri);
     }
   }, [user]);
 
