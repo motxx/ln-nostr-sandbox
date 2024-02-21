@@ -18,6 +18,11 @@ export class Note {
 
 export type SubscribeTimelineOptions = {
   since?: Date;
+  limit?: number;
+  text?: boolean;
+  image?: boolean;
+  audio?: boolean;
+  video?: boolean;
 };
 
 export interface NoteRepository {

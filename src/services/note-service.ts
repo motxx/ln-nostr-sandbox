@@ -38,31 +38,32 @@ export class NoteService implements NoteRepository {
       {
         kinds: [NDKKind.Text],
         authors: Array.from(follows.values()).map((a) => a.pubkey),
-        since: unixtimeOf(options?.since ?? yesterday()),
+        since: options?.since ? unixtimeOf(options.since!) : undefined,
+        limit: options?.limit ?? 20,
+        // NIP-50: Search Capability - https://scrapbox.io/nostr/NIP-50
+        // search文字列の仕様はRelayer依存
+        search: "https?.+\\.png",
       },
-      (event: NDKEvent) =>
+      (event: NDKEvent) => {
+        const imageUrls = event.content.match(/(https?.+\.png)/);
+        console.log(imageUrls);
         onNote(
           new Note(
             event.id,
             event.content,
-            "https://via.placeholder.com/150",
+            imageUrls ? imageUrls[0] : "https://via.placeholder.com/150",
             0
           )
-        )
+        );
+      }
     );
   }
 
-  async subscribeZaps(onEvent: (event: NDKEvent) => void) {
+  async subscribeZaps(onZapEvent: (event: NDKEvent) => void) {
     if (!this.#nostrClient) {
       await this.connect();
     }
 
-    await this.#nostrClient.subscribeEvents(
-      {
-        kinds: [NDKKind.Zap],
-        since: unixtime(),
-      },
-      onEvent
-    );
+    throw new Error("Method not implemented.");
   }
 }

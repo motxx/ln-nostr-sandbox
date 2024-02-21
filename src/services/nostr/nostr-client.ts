@@ -33,8 +33,11 @@ export class NostrClient {
 
   static readonly LoginTimeoutMSec = 60000;
   static readonly Relays = [
-    ...CommonRelays.NostrWalletAuthCompatibles,
-    ...CommonRelays.Iris,
+    ...CommonRelays.NIP67NostrWalletAuthCompatibles,
+    ...CommonRelays.NIP50SearchCapabilityCompatibles,
+    ...CommonRelays.JapaneseRelays,
+    //...CommonRelays.Iris,
+    // "wss://relay.nostr.wirednet.jp",
   ];
   static #nostrClient?: NostrClient;
 
@@ -71,13 +74,9 @@ export class NostrClient {
     onEvent: (event: NDKEvent) => void
   ) {
     const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk);
-    await this.#ndk
-      .subscribe(filters, { closeOnEose: true }, relaySet)
-      .on("event", onEvent)
-      .on("eose", () => {
-        console.log("eose");
-      })
-      .start();
+    this.#ndk
+      .subscribe(filters, { closeOnEose: true }, relaySet, true)
+      .on("event", onEvent);
   }
 
   /**

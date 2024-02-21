@@ -1,7 +1,14 @@
 // https://scrapbox.io/nostr/%E4%B8%BB%E8%A6%81%E3%82%AF%E3%83%A9%E3%82%A4%E3%82%A2%E3%83%B3%E3%83%88%E3%81%AE%E3%83%87%E3%83%95%E3%82%A9%E3%83%AB%E3%83%88%E3%83%AA%E3%83%AC%E3%83%BC
 
 export const CommonRelays = {
-  NostrWalletAuthCompatibles: ["wss://relay.mutinywallet.com"],
+  NIP67NostrWalletAuthCompatibles: ["wss://relay.mutinywallet.com"],
+  NIP50SearchCapabilityCompatibles: [
+    `wss://relay.nostr.band`,
+    `wss://search.nos.today`,
+    `wss://nostrja-kari-nip50.heguro.com`,
+    `wss://universe.nostrich.land`,
+    `wss://filter.nostr.wine/REPLACE_WITH_YOUR_NPUB?broadcast=true`,
+  ],
   Coracle: [
     // "wss://brb.io",
     "wss://nostr.zebedee.cloud",

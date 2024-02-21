@@ -19,12 +19,25 @@ function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   useEffect(() => {
     if (user && noteService) {
-      new SubscribeTimeline(noteService).execute((note) => setNotes([...notes, note]));
+      new SubscribeTimeline(noteService).execute((note) => {
+        setNotes(prevNotes => {
+          console.log(prevNotes);
+          return [...prevNotes, note];
+        });
+      }, {
+        limit: 10,
+      });
     }
     if (user && walletService) {
       walletService.connectNwc(user.settings.connectionUri);
     }
-  }, [user]);
+  }, [user, noteService]);
+
+  useEffect(() => {
+    if (user && walletService) {
+      walletService.connectNwc(user.settings.connectionUri);
+    }
+  }, [user, walletService]);
 
   return (
     <BrowserRouter>

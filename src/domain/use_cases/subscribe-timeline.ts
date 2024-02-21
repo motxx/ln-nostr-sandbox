@@ -1,9 +1,16 @@
-import { Note, NoteRepository } from "../entities/note";
+import {
+  Note,
+  NoteRepository,
+  SubscribeTimelineOptions,
+} from "../entities/note";
 
 export class SubscribeTimeline {
   constructor(private noteRepository: NoteRepository) {}
 
-  async execute(onNote: (note: Note) => void, options?: { since?: Date }) {
+  async execute(
+    onNote: (note: Note) => void,
+    options?: SubscribeTimelineOptions
+  ) {
     this.noteRepository.subscribeTimeline(onNote, options);
   }
 }
