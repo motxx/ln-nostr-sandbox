@@ -1,15 +1,15 @@
 import React from 'react';
 import ImageGallery from "./ImageGallary";
 import { User } from '../domain/entities/user';
-import { Content } from '../domain/entities/content';
+import { Note } from '../domain/entities/note';
 import { WalletService } from '../services/wallet-service';
 import { UserService } from '../services/user-service';
-import { ContentService } from '../services/content-service';
+import { NoteService } from '../services/note-service';
 
 export interface HomeProps {
   user?: User;
-  contents: Content[];
-  contentService: ContentService;
+  notes: Note[];
+  noteService: NoteService;
   userService: UserService;
   walletService: WalletService;
 }
@@ -18,8 +18,8 @@ const Home: React.FC<HomeProps> = (props) => {
   return (
     <div>
       <ImageGallery
-        contents={props.contents}
-        contentService={props.contentService}
+        notes={props.notes}
+        noteService={props.noteService}
         userService={props.userService}
         walletService={props.walletService}
       />

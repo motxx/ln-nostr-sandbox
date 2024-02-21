@@ -1,4 +1,4 @@
-import { UserFailedToLoginError } from "../error";
+import { NostrClientConnectError } from "./error";
 import { NostrClient } from "./nostr-client";
 
 /**
@@ -23,7 +23,7 @@ export class NostrWalletAuth {
    */
   static async connect(): Promise<NostrWalletAuth> {
     const nostrClient = await NostrClient.connect().catch((error) => {
-      throw new UserFailedToLoginError(error);
+      throw new NostrClientConnectError(error);
     });
     return new NostrWalletAuth(nostrClient);
   }

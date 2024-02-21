@@ -5,6 +5,16 @@ export const unixtime = () => {
   return Math.floor(Date.now() / 1000);
 };
 
+export const unixtimeOf = (date: Date) => {
+  return Math.floor(date.getTime() / 1000);
+};
+
+export const yesterday = () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday;
+};
+
 /**
  * Generate event id from unsigned event according to NIP-01
  * @param event UnsignedEvent
