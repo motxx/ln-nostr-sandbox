@@ -1,8 +1,15 @@
-import { LnurlPay } from "./nostr-client";
+import { ErrorWithDetails } from "../error";
+import { LnurlPay } from "./lnurl-pay";
 
 export class NostrNoWindowNostrError extends Error {
   constructor() {
     super("No window.nostr(NIP-07) found.");
+  }
+}
+
+export class NostrClientConnectError extends ErrorWithDetails {
+  constructor(details: Error) {
+    super("Failed to connect NostrClient", details);
   }
 }
 

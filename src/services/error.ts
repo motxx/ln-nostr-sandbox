@@ -7,9 +7,15 @@ export class ErrorWithDetails extends Error {
   }
 }
 
-export class UserFailedToLoginError extends ErrorWithDetails {
+export class UserFailedToConnectError extends ErrorWithDetails {
   constructor(details: Error) {
-    super("User failed to login", details);
+    super("User failed to connect", details);
+  }
+}
+
+export class UserNotLoggedInError extends Error {
+  constructor() {
+    super("User not logged in");
   }
 }
 

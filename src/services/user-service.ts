@@ -7,9 +7,10 @@ import {
 import { UserStore } from "../infrastructure/storage/user-store";
 import { NostrClient } from "./nostr/nostr-client";
 import {
+  UserFailedToConnectError,
   UserFailedToGetSettingsError,
-  UserFailedToLoginError,
   UserFailedToUpdateSettingsError,
+  UserNotLoggedInError,
 } from "./error";
 
 export interface SendZapRequestResponse {
@@ -22,12 +23,12 @@ export interface SendZapRequestResponse {
 }
 
 export class UserService implements UserRepository, UserSettingsRepository {
-  #nostrClient: NostrClient;
-  #userStore: UserStore;
+  #nostrClient?: NostrClient;
+  #userStore?: UserStore;
 
   async login(): Promise<User> {
     this.#nostrClient = await NostrClient.connect().catch((error) => {
-      throw new UserFailedToLoginError(error);
+      throw new UserFailedToConnectError(error);
     });
     const npub = await this.#nostrClient.getNpub();
     const pubkey = await this.#nostrClient.getPublicKey();
@@ -37,6 +38,9 @@ export class UserService implements UserRepository, UserSettingsRepository {
   }
 
   async fetch(): Promise<User> {
+    if (!this.#isLoggedIn()) {
+      throw new UserNotLoggedInError();
+    }
     const npub = await this.#nostrClient.getNpub();
     const pubkey = await this.#nostrClient.getPublicKey();
     const settings = await this.fetchUserSettings(npub);
@@ -44,6 +48,10 @@ export class UserService implements UserRepository, UserSettingsRepository {
   }
 
   async fetchUserSettings(npub: string): Promise<UserSettings> {
+    if (!this.#isLoggedIn()) {
+      throw new UserNotLoggedInError();
+    }
+
     let settings = new UserSettings("", "", 1);
     try {
       const s = this.#userStore.get(npub);
@@ -60,6 +68,10 @@ export class UserService implements UserRepository, UserSettingsRepository {
     npub: string,
     settings: UserSettings
   ): Promise<UserSettings> {
+    if (!this.#isLoggedIn()) {
+      throw new UserNotLoggedInError();
+    }
+
     try {
       this.#userStore.set(npub, settings);
     } catch (error) {
@@ -72,6 +84,14 @@ export class UserService implements UserRepository, UserSettingsRepository {
     nip05Id: string,
     sats: number
   ): Promise<SendZapRequestResponse> {
+    if (!this.#isLoggedIn()) {
+      throw new UserNotLoggedInError();
+    }
+
     return this.#nostrClient.sendZapRequest(nip05Id, sats);
+  }
+
+  #isLoggedIn() {
+    return this.#nostrClient !== undefined && this.#userStore !== undefined;
   }
 }

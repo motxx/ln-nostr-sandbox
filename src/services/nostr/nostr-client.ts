@@ -3,8 +3,9 @@ import NDK, {
   NDKUser,
   NDKNip07Signer,
   NDKKind,
+  NDKEvent,
   NDKRelaySet,
-  NDKRelay,
+  NDKFilter,
 } from "@nostr-dev-kit/ndk";
 import { generateEventId, unixtime } from "./utils";
 import {
@@ -32,14 +33,17 @@ export class NostrClient {
 
   static readonly LoginTimeoutMSec = 60000;
   static readonly Relays = [
-    ...CommonRelays.NostrWalletAuthCompatibles,
-    ...CommonRelays.Iris,
+    ...CommonRelays.NIP67NostrWalletAuthCompatibles,
+    ...CommonRelays.NIP50SearchCapabilityCompatibles,
+    ...CommonRelays.JapaneseRelays,
+    //...CommonRelays.Iris,
+    // "wss://relay.nostr.wirednet.jp",
   ];
   static #nostrClient?: NostrClient;
 
   /**
    * Connect NostrClient by NIP-07 (window.nostr)
-   * @returns Promise<NostrClient>
+   * @returns singleton Promise<NostrClient>
    */
   static async connect(): Promise<NostrClient> {
     if (NostrClient.#nostrClient) {
@@ -47,50 +51,40 @@ export class NostrClient {
     }
 
     const signer = new NDKNip07Signer(NostrClient.LoginTimeoutMSec);
-    const user = await signer.blockUntilReady();
+    await signer.blockUntilReady();
+
     const ndk = new NDK({
       explicitRelayUrls: NostrClient.Relays,
       signer,
     });
     ndk.assertSigner();
-
     await ndk.connect(1);
-
-    //const bitcoinMagazine = "npub1jfn4ghffz7uq7urllk6y4rle0yvz26800w4qfmn4dv0sr48rdz9qyzt047";
-    const relaySet = new NDKRelaySet(new Set(), ndk);
-    for (const relay of NostrClient.Relays) {
-      relaySet.addRelay(new NDKRelay(relay));
-    }
-
-    const subscription = ndk.subscribe(
-      {
-        kinds: [
-          0,
-          1,
-          4,
-          NDKKind.Zap,
-          NDKKind.ZapRequest,
-          NDKKind.NWCInfoEvent,
-          NDKKind.NWCRequest,
-          NDKKind.NWCResponse,
-          NDKKind.NWARequest,
-        ],
-        authors: [user.pubkey],
-      },
-      { closeOnEose: true },
-      relaySet,
-      true
-    );
-    subscription.on("request", (event) => {
-      console.log(`request: ${event.id}`);
-    });
-    subscription.on("event", (event) => {
-      console.log("event", event);
-    });
-    subscription.on("eose", () => console.log(`eose`));
-
+    const user = await ndk.signer.user();
     NostrClient.#nostrClient = new NostrClient(ndk, user);
     return NostrClient.#nostrClient;
+  }
+
+  /**
+   * Subscribe events specified by filters
+   * @param filters NDKFilter
+   * @param onEvent listener of NDKEvent
+   */
+  async subscribeEvents(
+    filters: NDKFilter,
+    onEvent: (event: NDKEvent) => void
+  ) {
+    const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk);
+    this.#ndk
+      .subscribe(filters, { closeOnEose: true }, relaySet, true)
+      .on("event", onEvent);
+  }
+
+  /**
+   * Get user
+   * @returns NDKUser
+   */
+  async getUser() {
+    return this.#user;
   }
 
   /**
