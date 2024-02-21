@@ -1,4 +1,3 @@
-import { Event, UnsignedEvent } from "nostr-tools";
 import NDK, {
   NDKUser,
   NDKNip07Signer,
@@ -6,6 +5,7 @@ import NDK, {
   NDKEvent,
   NDKRelaySet,
   NDKFilter,
+  NostrEvent,
 } from "@nostr-dev-kit/ndk";
 import { generateEventId, unixtime } from "./utils";
 import {
@@ -142,7 +142,7 @@ export class NostrClient {
     };
   }
 
-  async #requestLnurlPay(metadata: Event): Promise<LnurlPay> {
+  async #requestLnurlPay(metadata: NostrEvent): Promise<LnurlPay> {
     const { lud16 } = JSON.parse(metadata.content);
     const lnurlPayUrl = toLnurlPayUrl(lud16);
     const res = await axios.get(lnurlPayUrl);
@@ -154,11 +154,11 @@ export class NostrClient {
   }
 
   async #getZapEndpointWithParams(
-    unsignedEvent: UnsignedEvent,
+    unsignedEvent: NostrEvent,
     sig: string,
     lud16: string
   ) {
-    const metadata: Event = {
+    const metadata: NostrEvent = {
       ...unsignedEvent,
       id: unsignedEvent.tags[4][1],
       kind: 0,
@@ -188,13 +188,13 @@ export class NostrClient {
     return zapEndpoint.toString();
   }
 
-  async #makeZapRequest(nip05Id: string, msat: number): Promise<UnsignedEvent> {
+  async #makeZapRequest(nip05Id: string, msat: number): Promise<NostrEvent> {
     const to = await NDKUser.fromNip05(nip05Id, this.#ndk);
     if (!to) {
       throw new NostrUnknownUserError(nip05Id);
     }
 
-    const unsignedEvent: UnsignedEvent = {
+    const unsignedEvent: NostrEvent = {
       kind: NDKKind.ZapRequest,
       pubkey: this.#user.pubkey,
       created_at: unixtime(),

@@ -1,4 +1,4 @@
-import { UnsignedEvent } from "nostr-tools";
+import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { createHash } from "sha256-uint8array";
 
 export const unixtime = () => {
@@ -17,10 +17,10 @@ export const yesterday = () => {
 
 /**
  * Generate event id from unsigned event according to NIP-01
- * @param event UnsignedEvent
+ * @param event NostrEvent
  * @returns string
  */
-export const generateEventId = (event: UnsignedEvent) => {
+export const generateEventId = (event: NostrEvent) => {
   // https://github.com/nostr-protocol/nips/blob/master/01.md#events-and-signatures
   const { kind, pubkey, created_at, tags, content } = event;
   const message = JSON.stringify([0, pubkey, created_at, kind, tags, content]);
