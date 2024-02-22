@@ -59,6 +59,20 @@ export class NoteService implements NoteRepository {
     );
   }
 
+  async subscribeNWARequest(onNWARequest: (event: NDKEvent) => void) {
+    if (!this.#nostrClient) {
+      await this.connect();
+    }
+
+    await this.#nostrClient.subscribeEvents(
+      {
+        kinds: [NDKKind.NWARequest],
+        since: unixtimeOf(yesterday()),
+      },
+      onNWARequest
+    );
+  }
+
   async subscribeZaps(onZapEvent: (event: NDKEvent) => void) {
     if (!this.#nostrClient) {
       await this.connect();
