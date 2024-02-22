@@ -23,4 +23,8 @@ export interface UserRepository {
 
 export interface UserSettingsRepository {
   updateSettings(npub: string, settings: UserSettings): Promise<UserSettings>;
+
+  subscribeNWARequest(
+    onNWARequest: (connectionUri: string) => void
+  ): Promise<void>;
 }

@@ -20,10 +20,7 @@ function App() {
   useEffect(() => {
     if (user && noteService) {
       new SubscribeTimeline(noteService).execute((note) => {
-        setNotes(prevNotes => {
-          console.log(prevNotes);
-          return [...prevNotes, note];
-        });
+        setNotes(prevNotes => [...prevNotes, note]);
       }, {
         limit: 10,
       });

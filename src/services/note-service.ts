@@ -4,7 +4,7 @@ import {
   NoteRepository,
   SubscribeTimelineOptions,
 } from "../domain/entities/note";
-import { unixtime, unixtimeOf, yesterday } from "./nostr/utils";
+import { unixtimeOf } from "./nostr/utils";
 import { NostrClient } from "./nostr/nostr-client";
 
 export class NoteService implements NoteRepository {
@@ -46,7 +46,6 @@ export class NoteService implements NoteRepository {
       },
       (event: NDKEvent) => {
         const imageUrls = event.content.match(/(https?.+\.png)/);
-        console.log(imageUrls);
         onNote(
           new Note(
             event.id,
@@ -56,20 +55,6 @@ export class NoteService implements NoteRepository {
           )
         );
       }
-    );
-  }
-
-  async subscribeNWARequest(onNWARequest: (event: NDKEvent) => void) {
-    if (!this.#nostrClient) {
-      await this.connect();
-    }
-
-    await this.#nostrClient.subscribeEvents(
-      {
-        kinds: [NDKKind.NWARequest],
-        since: unixtimeOf(yesterday()),
-      },
-      onNWARequest
     );
   }
 
