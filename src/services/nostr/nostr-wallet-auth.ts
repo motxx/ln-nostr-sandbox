@@ -1,3 +1,4 @@
+import { BudgetPeriod } from "../../domain/use_cases/generate-wallet-auth-uri";
 import { NostrClientConnectError } from "./error";
 import { NostrClient } from "./nostr-client";
 
@@ -10,7 +11,7 @@ import { NostrClient } from "./nostr-client";
 export class NostrWalletAuth {
   #nostrClient: NostrClient;
 
-  static readonly CLIENT_PROFILE_NPUB =
+  static readonly ClientProfileNpub =
     import.meta.env.VITE_NOSTR_CLIENT_PROFILE_NPUB || "";
 
   private constructor(nostrClient: NostrClient) {
@@ -32,7 +33,7 @@ export class NostrWalletAuth {
    * Generate nostr+walletauth URI
    * @returns Promise<string>
    */
-  async generateAuthUri() {
+  async generateAuthUri(budget: number, period: BudgetPeriod) {
     const pubkey = await this.#nostrClient.getPublicKey();
     const url = new URL(`nostr+walletauth://${pubkey}`);
     for (const relay of NostrClient.Relays) {
@@ -53,8 +54,8 @@ export class NostrWalletAuth {
     );
     // not supported yet
     // url.searchParams.append("optional_commands", "list_transactions");
-    url.searchParams.append("budget", "10000/daily");
-    url.searchParams.append("identity", NostrWalletAuth.CLIENT_PROFILE_NPUB);
+    url.searchParams.append("budget", `${budget}/${period}`);
+    url.searchParams.append("identity", NostrWalletAuth.ClientProfileNpub);
     const authUri = url.toString().replace(/%2520/g, "%20");
     return authUri;
   }

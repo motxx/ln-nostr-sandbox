@@ -1,3 +1,4 @@
+import { BudgetPeriod } from "../domain/use_cases/generate-wallet-auth-uri";
 import { NostrWalletConnect } from "./nostr/nostr-wallet-connect";
 import { WalletNotInitializedError } from "./error";
 import { NostrWalletAuth } from "./nostr/nostr-wallet-auth";
@@ -18,9 +19,9 @@ export class WalletService {
     this.#nwa = nwa;
   }
 
-  async generateAuthUri() {
+  async generateAuthUri(budget: number, period: BudgetPeriod) {
     if (this.#nwa) {
-      return this.#nwa.generateAuthUri();
+      return this.#nwa.generateAuthUri(budget, period);
     }
     throw new WalletNotInitializedError();
   }

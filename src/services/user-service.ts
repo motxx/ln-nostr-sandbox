@@ -13,7 +13,7 @@ import {
   UserNotLoggedInError,
 } from "./error";
 import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
-import { unixtimeOf, yesterday } from "./nostr/utils";
+import { unixtime } from "./nostr/utils";
 
 export interface SendZapRequestResponse {
   pr: string;
@@ -90,10 +90,11 @@ export class UserService implements UserRepository, UserSettingsRepository {
     await this.#nostrClient.subscribeEvents(
       {
         kinds: [NDKKind.NWARequest],
-        since: unixtimeOf(yesterday()),
+        since: unixtime(),
       },
       (event: NDKEvent) => {
         console.log("NWARequest", event);
+        // TODO: decrypt the event data
         onNWARequest("nostr+walletconnect://example");
       }
     );
