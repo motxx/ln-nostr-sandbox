@@ -12,6 +12,8 @@ import {
   UserFailedToUpdateSettingsError,
   UserNotLoggedInError,
 } from "./error";
+import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
+import { unixtimeOf, yesterday } from "./nostr/utils";
 
 export interface SendZapRequestResponse {
   pr: string;
@@ -78,6 +80,23 @@ export class UserService implements UserRepository, UserSettingsRepository {
       throw new UserFailedToUpdateSettingsError(error);
     }
     return settings;
+  }
+
+  async subscribeNWARequest(onNWARequest: (connectionUri: string) => void) {
+    if (!this.#nostrClient) {
+      throw new UserNotLoggedInError();
+    }
+
+    await this.#nostrClient.subscribeEvents(
+      {
+        kinds: [NDKKind.NWARequest],
+        since: unixtimeOf(yesterday()),
+      },
+      (event: NDKEvent) => {
+        console.log("NWARequest", event);
+        onNWARequest("nostr+walletconnect://example");
+      }
+    );
   }
 
   async sendZapRequest(
