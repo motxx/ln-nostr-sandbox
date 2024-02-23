@@ -13,19 +13,28 @@ export interface ImageGalleryProps {
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = (props) => {
+  const breakpointCols = {
+    default: 4,
+    1100: 3,
+    700: 2,
+    500: 1
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="columns-2 md:columns-3 lg:columns-4">
         {props.notes.map((note) => (
-          <ImageCard
-            key={note.id}
-            noteId={note.id}
-            text={note.text}
-            imageUrl={note.imageUrl}
-            noteService={props.noteService}
-            userService={props.userService}
-            walletService={props.walletService}
-          />
+          <div className="mb-4">
+            <ImageCard
+              key={note.id}
+              noteId={note.id}
+              text={note.text}
+              imageUrl={note.imageUrl}
+              noteService={props.noteService}
+              userService={props.userService}
+              walletService={props.walletService}
+            />
+          </div>
         ))}
       </div>
     </div>
