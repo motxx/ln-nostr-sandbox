@@ -13,13 +13,6 @@ export interface ImageGalleryProps {
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = (props) => {
-  const breakpointCols = {
-    default: 4,
-    1100: 3,
-    700: 2,
-    500: 1
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="columns-2 md:columns-3 lg:columns-4">
