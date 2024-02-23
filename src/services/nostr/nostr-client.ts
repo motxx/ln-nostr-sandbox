@@ -6,6 +6,7 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
+  NDKSigner,
 } from "@nostr-dev-kit/ndk";
 import { generateEventId, unixtime } from "./utils";
 import {
@@ -25,19 +26,20 @@ import { LnurlPay, toBech32EncodedLnurl, toLnurlPayUrl } from "./lnurl-pay";
 export class NostrClient {
   #ndk: NDK;
   #user: NDKUser;
+  #eventIdSet: Set<string>;
+  #events: NDKEvent[] = [];
 
   private constructor(ndk: NDK, user: NDKUser) {
     this.#ndk = ndk;
     this.#user = user;
+    this.#eventIdSet = new Set();
   }
 
   static readonly LoginTimeoutMSec = 60000;
   static readonly Relays = [
-    ...CommonRelays.NIP67NostrWalletAuthCompatibles,
     ...CommonRelays.NIP50SearchCapabilityCompatibles,
     ...CommonRelays.JapaneseRelays,
     //...CommonRelays.Iris,
-    // "wss://relay.nostr.wirednet.jp",
   ];
   static #nostrClient?: NostrClient;
 
@@ -66,8 +68,8 @@ export class NostrClient {
 
   /**
    * Subscribe events specified by filters
-   * @param filters NDKFilter
    * @param onEvent listener of NDKEvent
+   * @param filters NDKFilter
    */
   async subscribeEvents(
     filters: NDKFilter,
@@ -75,8 +77,23 @@ export class NostrClient {
   ) {
     const relaySet = NDKRelaySet.fromRelayUrls(NostrClient.Relays, this.#ndk);
     this.#ndk
-      .subscribe(filters, { closeOnEose: true }, relaySet, true)
-      .on("event", onEvent);
+      .subscribe(
+        filters,
+        {
+          closeOnEose: false, // subscribe forever
+        },
+        relaySet,
+        true
+      )
+      .on("event", (event: NDKEvent) => {
+        if (this.#eventIdSet.has(event.id)) {
+          return;
+        }
+        this.#eventIdSet.add(event.id);
+        this.#events.push(event);
+        this.#events.sort((a, b) => b.created_at - a.created_at);
+        onEvent(event);
+      });
   }
 
   /**
@@ -101,6 +118,19 @@ export class NostrClient {
    */
   async getNpub() {
     return this.#user.npub;
+  }
+
+  /**
+   * Get user's lud16
+   * @returns lud16 or undefined
+   */
+  async getLud16() {
+    return this.#user.profile?.lud16;
+  }
+
+  async decryptEvent(event: NDKEvent) {
+    await event.decrypt();
+    return event;
   }
 
   /**

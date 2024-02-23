@@ -2,7 +2,7 @@ import { NostrEvent } from "@nostr-dev-kit/ndk";
 import { createHash } from "sha256-uint8array";
 
 export const unixtime = () => {
-  return Math.floor(Date.now() / 1000);
+  return Math.floor(new Date().getTime() / 1000);
 };
 
 export const unixtimeOf = (date: Date) => {
