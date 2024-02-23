@@ -26,6 +26,7 @@ const Settings: React.FC<SettingsProps> = (props) => {
 
   useEffect(() => {
     new SubscribeNWARequest(props.userService).execute((connectionUri) => {
+      console.log('setConnectionUri', connectionUri);
       setConnectionUri(connectionUri);
     });
   });
@@ -76,7 +77,7 @@ const Settings: React.FC<SettingsProps> = (props) => {
                 />
                 <BudgetPeriodSelector selectedPeriod={selectedPeriod} onSelectPeriod={handleSelectPeriod} />
               </div>
-              <div className="mb-4">
+              <div className="mb-8">
                 <button
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:shadow-outline"
                   type="submit">
@@ -84,7 +85,9 @@ const Settings: React.FC<SettingsProps> = (props) => {
                 </button>
               </div>
               {walletAuthUri && (
-                <QRCodeSVG value={walletAuthUri} size={300}/>
+                <div className='border p-4 w-[234px]'>
+                  <QRCodeSVG value={walletAuthUri} size={200}/>
+                </div>
               )}
             </div>
           </form>

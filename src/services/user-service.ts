@@ -14,6 +14,7 @@ import {
 } from "./error";
 import { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { unixtime } from "./nostr/utils";
+import { NostrWalletAuth } from "./nostr/nostr-wallet-auth";
 
 export interface SendZapRequestResponse {
   pr: string;
@@ -27,6 +28,7 @@ export interface SendZapRequestResponse {
 export class UserService implements UserRepository, UserSettingsRepository {
   #nostrClient?: NostrClient;
   #userStore?: UserStore;
+  #nwa?: NostrWalletAuth;
 
   async login(): Promise<User> {
     this.#nostrClient = await NostrClient.connect().catch((error) => {
@@ -87,15 +89,23 @@ export class UserService implements UserRepository, UserSettingsRepository {
       throw new UserNotLoggedInError();
     }
 
+    const cachedEventIds = new Set<string>();
     await this.#nostrClient.subscribeEvents(
       {
         kinds: [NDKKind.NWARequest],
         since: unixtime(),
       },
-      (event: NDKEvent) => {
+      async (event: NDKEvent) => {
+        if (cachedEventIds.has(event.id)) {
+          return;
+        }
+        cachedEventIds.add(event.id);
         console.log("NWARequest", event);
-        // TODO: decrypt the event data
-        onNWARequest("nostr+walletconnect://example");
+        if (!this.#nwa) {
+          this.#nwa = await NostrWalletAuth.connect();
+        }
+        const connectionUri = await this.#nwa.decryptNWARequest(event);
+        onNWARequest(connectionUri);
       }
     );
   }

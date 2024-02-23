@@ -22,7 +22,7 @@ function App() {
       new SubscribeTimeline(noteService).execute((note) => {
         setNotes(prevNotes => [...prevNotes, note]);
       }, {
-        limit: 10,
+        limit: 100,
       });
     }
     if (user && walletService) {
