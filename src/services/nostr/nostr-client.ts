@@ -6,7 +6,6 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
-  NDKSigner,
 } from "@nostr-dev-kit/ndk";
 import { generateEventId, unixtime } from "./utils";
 import {
@@ -22,6 +21,7 @@ import axios from "axios";
 import { SendZapRequestResponse } from "../user-service";
 import { CommonRelays } from "./common-relays";
 import { LnurlPay, toBech32EncodedLnurl, toLnurlPayUrl } from "./lnurl-pay";
+import { verifyEvent } from "nostr-tools/pure";
 
 export class NostrClient {
   #ndk: NDK;
@@ -63,7 +63,36 @@ export class NostrClient {
     await ndk.connect(1);
     const user = await ndk.signer.user();
     NostrClient.#nostrClient = new NostrClient(ndk, user);
+    const verified = await NostrClient.#nostrClient.authenticate();
+    if (!verified) {
+      throw new Error("Failed to authenticate");
+    }
     return NostrClient.#nostrClient;
+  }
+
+  async authenticate() {
+    console.log("authenticate start");
+    const loginUrl = "https://nostrbuild.tokyo/auth/login";
+    let event: NostrEvent = {
+      kind: NDKKind.HttpAuth,
+      pubkey: this.#user.pubkey,
+      content: "",
+      created_at: unixtime(),
+      tags: [
+        ["u", loginUrl],
+        ["method", "POST"],
+      ],
+    };
+    event.id = generateEventId(event);
+    const sig = await this.#ndk.signer!.sign(event);
+    const signedEvent: NostrEvent = { ...event, sig };
+    // Verify the signature on the server.
+    // const verified = post(loginUrl, { signedEvent });
+    const verified = await verifyEvent(signedEvent);
+    if (verified) {
+      console.log("verified", { verified });
+    }
+    return verified;
   }
 
   /**
