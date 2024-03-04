@@ -6,7 +6,6 @@ import NDK, {
   NDKRelaySet,
   NDKFilter,
   NostrEvent,
-  NDKSigner,
 } from "@nostr-dev-kit/ndk";
 import { generateEventId, unixtime } from "./utils";
 import {
@@ -62,6 +61,7 @@ export class NostrClient {
     ndk.assertSigner();
     await ndk.connect(1);
     const user = await ndk.signer.user();
+    await user.fetchProfile();
     NostrClient.#nostrClient = new NostrClient(ndk, user);
     return NostrClient.#nostrClient;
   }
@@ -118,6 +118,22 @@ export class NostrClient {
    */
   async getNpub() {
     return this.#user.npub;
+  }
+
+  /**
+   * Get user's name
+   * @returns name or undefined
+   */
+  async getUserName() {
+    return this.#user.profile?.name;
+  }
+
+  /**
+   * Get user's image
+   * @returns image or undefined
+   */
+  async getUserImage() {
+    return this.#user.profile?.image;
   }
 
   /**
