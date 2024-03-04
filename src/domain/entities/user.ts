@@ -3,6 +3,7 @@ export class User {
     public readonly npub: string,
     public readonly pubkey: string,
     public readonly username: string,
+    public readonly image: string,
     public readonly settings: UserSettings
   ) {}
 }

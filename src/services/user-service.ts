@@ -37,8 +37,10 @@ export class UserService implements UserRepository, UserSettingsRepository {
     const npub = await this.#nostrClient.getNpub();
     const pubkey = await this.#nostrClient.getPublicKey();
     this.#userStore = new UserStore(npub);
+    const userName = (await this.#nostrClient.getUserName()) || "";
+    const userImage = (await this.#nostrClient.getUserImage()) || "";
     const settings = await this.fetchUserSettings(npub);
-    return new User(npub, pubkey, "nostr", settings);
+    return new User(npub, pubkey, userName, userImage, settings);
   }
 
   async fetch(): Promise<User> {
@@ -47,8 +49,10 @@ export class UserService implements UserRepository, UserSettingsRepository {
     }
     const npub = await this.#nostrClient.getNpub();
     const pubkey = await this.#nostrClient.getPublicKey();
+    const userName = (await this.#nostrClient.getUserName()) || "";
+    const userImage = (await this.#nostrClient.getUserImage()) || "";
     const settings = await this.fetchUserSettings(npub);
-    return new User(npub, pubkey, "nostr", settings);
+    return new User(npub, pubkey, userName, userImage, settings);
   }
 
   async fetchUserSettings(npub: string): Promise<UserSettings> {
